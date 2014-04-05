@@ -11,6 +11,8 @@ Bitcoin Buyer.
 
 -t = Always buy bitcoin
 
+-b = Only buy if both cart and logreg recommend buying
+
 """
 
 import sys
