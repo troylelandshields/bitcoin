@@ -7,6 +7,8 @@ Bitcoin Buyer.
 
 -l = Buy according to the logReg
 
+-c = Buy according to the CART
+
 
 """
 
@@ -23,6 +25,7 @@ locale.setlocale( locale.LC_ALL, '' )
 perf = False
 rand = False
 logReg = False
+cart = False
 money = 1000
 bitcoin = 0
 cutoff = 0.5
@@ -49,7 +52,7 @@ def sellBitcoin(price):
     bitcoin = 0
 
 def runTest(filePath):
-  global money, bitcoin, rand, perf, logReg
+  global money, bitcoin, rand, perf, logReg, cart
 
   bought = 0
   sold = 0
@@ -64,7 +67,8 @@ def runTest(filePath):
             recommendation = random.choice([True, False])
           elif logReg:
             recommendation = getRecommendation(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
-
+          elif cart:
+            recommendation = getCart(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
           if recommendation:
             #print "Buying bitcoin"
             bought+=1
@@ -82,7 +86,7 @@ def runTest(filePath):
           #print
         except Exception as e:
           pass
-          #print e
+          print e
   print
   print "Final value: \t\t\t$", locale.currency(endValue, grouping=True)
   print
@@ -115,13 +119,39 @@ def getRecommendation(costPrctTrxn, Can_conv_rate, Can_rec_rate, Euro_conv_rate,
   else:
     return False
 
+s1 = 5.2507
+s2 = 2.4825
+s3 = 0.8173
+s4 = 1.0821
+s5 = 1.5418
+s6 = 1.0742
+
+def getCart(costPrctTrxn, Can_conv_rate, Can_rec_rate, Euro_conv_rate, Euro_rec_rate,GBP_conv_rate, GBP_rec_rate, USD_conv_rate, USD_rec_rate):
+  if(costPrctTrxn < s1):
+    if(costPrctTrxn < s2):
+      if(Euro_conv_rate < s3):
+        if(costPrctTrxn < s5):
+          return True
+        else:
+          return False
+    else:
+      if(USD_conv_rate < s4):
+        if(Can_conv_rate < s6):
+          return True
+        else:
+          return True
+      else:
+        return True
+  else:
+    return False
+  return True
 
 
 def main():
-  global perf,rand,logReg
+  global perf,rand,logReg,cart
   # parse command line options
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hprl", ["help"])
+    opts, args = getopt.getopt(sys.argv[1:], "hprlc", ["help"])
 
   except getopt.error, msg:
     print msg
@@ -142,6 +172,10 @@ def main():
     if o in ("-l"):
       logReg = True
       print "Running LogReg"
+    if o in ("-c"):
+      cart = True
+      print "Running Cart"
+
 
   # process arguments
   for arg in args:
