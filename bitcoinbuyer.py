@@ -9,10 +9,9 @@ Bitcoin Buyer.
 
 -c = Buy according to the CART
 
+-t = Always buy bitcoin
 
 """
-
-
 
 import sys
 import getopt
@@ -26,6 +25,8 @@ perf = False
 rand = False
 logReg = False
 cart = False
+logAndCart = False
+alwaysTrue = False
 money = 1000
 bitcoin = 0
 cutoff = 0.5
@@ -52,7 +53,7 @@ def sellBitcoin(price):
     bitcoin = 0
 
 def runTest(filePath):
-  global money, bitcoin, rand, perf, logReg, cart
+  global money, bitcoin, rand, perf, logReg, cart, alwaysTrue, cartAndLog
 
   bought = 0
   sold = 0
@@ -69,6 +70,13 @@ def runTest(filePath):
             recommendation = getRecommendation(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
           elif cart:
             recommendation = getCart(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
+          elif alwaysTrue:
+            recommendation = True
+          elif cartAndLog:
+            t1 = getRecommendation(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
+            t2 = getCart(float(row[2]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),float(row[10]),float(row[11]))
+            recommendation = t1 and t2
+
           if recommendation:
             #print "Buying bitcoin"
             bought+=1
@@ -86,7 +94,7 @@ def runTest(filePath):
           #print
         except Exception as e:
           pass
-          print e
+          #print e
   print
   print "Final value: \t\t\t$", locale.currency(endValue, grouping=True)
   print
@@ -148,10 +156,10 @@ def getCart(costPrctTrxn, Can_conv_rate, Can_rec_rate, Euro_conv_rate, Euro_rec_
 
 
 def main():
-  global perf,rand,logReg,cart
+  global perf,rand,logReg,cart,alwaysTrue,cartAndLog
   # parse command line options
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hprlc", ["help"])
+    opts, args = getopt.getopt(sys.argv[1:], "hprlctb", ["help"])
 
   except getopt.error, msg:
     print msg
@@ -175,6 +183,12 @@ def main():
     if o in ("-c"):
       cart = True
       print "Running Cart"
+    if o in ("-t"):
+      alwaysTrue = True
+      print "Always Buying bitcoin"
+    if o in ("-b"):
+      cartAndLog = True
+      print "Using both CART and LogReg"
 
 
   # process arguments
